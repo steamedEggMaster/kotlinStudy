@@ -1,7 +1,10 @@
 package com.example.kotlinstudy.service
 
-import com.example.kotlinstudy.domain.member.Member
 import com.example.kotlinstudy.domain.member.MemberRepository
+import com.example.kotlinstudy.domain.member.MemberRes
+import com.example.kotlinstudy.domain.member.toDto
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,7 +23,7 @@ class MemberService(
 ) {
 
     @Transactional(readOnly = true)
-    fun findAll() : MutableList<Member> = memberRepository.findAll()
+    fun findAll(pageable: Pageable): Page<MemberRes> = memberRepository.findMembers(pageable).map { it.toDto() }
 
     //    @Transactional(readOnly = true)
     //    fun findAll() : MutableList<Member> {
