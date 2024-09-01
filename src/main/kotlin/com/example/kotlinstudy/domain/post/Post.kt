@@ -47,7 +47,8 @@ fun Post.toDto() : PostRes{
                 id = this.id!!,
                 title = this.title,
                 content = this.content,
-                member = this.member.toDto()
+                member = this.member.toDto() // FetchType.LAZY 이기 때문에, member를 가져오지 않았다가,
+                                             // toDto()에서 member을 찾기 때문에, member를 전부 가져오는 쿼리 발생
         )
 }
 

@@ -3,7 +3,7 @@ package com.example.kotlinstudy.config
 import com.example.kotlinstudy.domain.member.*
 import com.example.kotlinstudy.domain.member.Member
 import com.example.kotlinstudy.domain.member.MemberRepository
-import com.example.kotlinstudy.domain.member.MemberSaveReq
+import com.example.kotlinstudy.domain.member.LoginDto
 import com.example.kotlinstudy.domain.member.Role
 import com.example.kotlinstudy.domain.post.Post
 import com.example.kotlinstudy.domain.post.PostRepository
@@ -66,7 +66,7 @@ class InitData(
         return posts
     }
 
-    private fun generateMember(): Member = MemberSaveReq(
+    private fun generateMember(): Member = LoginDto(
             email = faker.internet.safeEmail(),
             password = "1234",
             role = Role.USER

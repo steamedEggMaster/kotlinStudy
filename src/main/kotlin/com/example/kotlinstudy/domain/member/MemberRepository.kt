@@ -4,6 +4,9 @@ import com.linecorp.kotlinjdsl.query.spec.ExpressionOrderSpec
 import com.linecorp.kotlinjdsl.querydsl.expression.column
 import com.linecorp.kotlinjdsl.spring.data.SpringDataQueryFactory
 import com.linecorp.kotlinjdsl.spring.data.listQuery
+import com.linecorp.kotlinjdsl.spring.data.selectQuery
+import com.linecorp.kotlinjdsl.spring.data.singleQuery
+import jakarta.persistence.TypedQuery
 import mu.KotlinLogging
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -27,6 +30,7 @@ interface MemberRepository : JpaRepository<Member, Long>, MemberCustomRepository
 interface MemberCustomRepository{
 
     fun findMembers(pageable:Pageable): Page<Member>
+    fun findMemberByEmail(email: String) : Member
 }
 class MemberCustomRepositoryImpl(
     private val queryFactory: SpringDataQueryFactory
@@ -53,4 +57,14 @@ class MemberCustomRepositoryImpl(
         }
     }
 
+    override fun findMemberByEmail(email: String) : Member {
+
+        return queryFactory.singleQuery {
+            select(entity(Member::class))
+            from(entity(Member::class))
+            where(
+                    column(Member::email).equal(email)
+            )
+        }
+    }
 }
