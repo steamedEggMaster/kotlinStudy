@@ -2,7 +2,6 @@ package com.example.kotlinstudy.domain.post
 
 import com.example.kotlinstudy.domain.AuditingEntity
 import com.example.kotlinstudy.domain.member.Member
-import com.example.kotlinstudy.domain.member.toDto
 import jakarta.persistence.*
 import jdk.jfr.Enabled
 
@@ -18,10 +17,11 @@ import jdk.jfr.Enabled
 @Entity
 @Table(name = "post")
 class Post(
+        id: Long = 0,
         title:String,
         content:String,
         member:Member
-) : AuditingEntity() {
+) : AuditingEntity(id) {
 
         @Column(name = "title", nullable = false)
         var title:String = title

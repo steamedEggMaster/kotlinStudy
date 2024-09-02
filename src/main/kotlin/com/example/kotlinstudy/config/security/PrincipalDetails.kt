@@ -1,8 +1,14 @@
 package com.example.kotlinstudy.config.security
 
 import com.example.kotlinstudy.domain.member.Member
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import mu.KotlinLogging
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
 /**
@@ -13,6 +19,8 @@ import org.springframework.security.core.userdetails.UserDetails
  * @Blog : https://blog.naver.com/noglass_gongdae
  * @GitHub :
  */
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 class PrincipalDetails(
         member: Member
         // 생성자에 val or var을 붙여 정의한다면,
@@ -29,11 +37,18 @@ class PrincipalDetails(
 
     private val log = KotlinLogging.logger {  }
 
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
+    //@JsonDeserialize(using = CustomAuthorityDeserializer::class)
+    @JsonIgnore
+    val collection:MutableList<GrantedAuthority> = ArrayList()
+
+    init {
+        this.collection.add(GrantedAuthority { "ROLE_" + member.role})
+    }
+
+    @JsonIgnore
+    override fun getAuthorities(): MutableCollection<GrantedAuthority> {
         log.info { "Role 검증" }
-        val collection:MutableCollection<GrantedAuthority> = ArrayList()
-        collection.add(GrantedAuthority { "ROLE_" + member.role })
-        return collection
+        return this.collection
     }
 
     override fun getPassword(): String {
@@ -43,4 +58,6 @@ class PrincipalDetails(
     override fun getUsername(): String {
         return member.email
     }
+
+
 }

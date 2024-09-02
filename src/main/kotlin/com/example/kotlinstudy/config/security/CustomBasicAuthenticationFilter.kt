@@ -1,6 +1,10 @@
 package com.example.kotlinstudy.config.security
 
+import com.auth0.jwt.exceptions.JWTVerificationException
+import com.auth0.jwt.exceptions.TokenExpiredException
 import com.example.kotlinstudy.domain.member.MemberRepository
+import com.example.kotlinstudy.util.CookieProvider
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -23,6 +27,7 @@ import java.lang.RuntimeException
 
 class CustomBasicAuthenticationFilter(
         private val memberRepository : MemberRepository,
+        private val objectMapper: ObjectMapper,
     authenticationManager:AuthenticationManager
 ) : BasicAuthenticationFilter(authenticationManager) {
 
@@ -53,10 +58,17 @@ class CustomBasicAuthenticationFilter(
 
         log.info { "token : $token" }
 
-        val memberEmail = jwtManager.getMemberEmail(token) ?: throw RuntimeException("memberEmail을 찾을 수 없습니다.")
-        val member = memberRepository.findMemberByEmail(memberEmail)
-        val principalDetails = PrincipalDetails(member) // 인증 객체
-        val authentication:Authentication = UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.authorities)
+
+        val principalJsonData = jwtManager.getPrincipalByAccessToken(token) ?: throw RuntimeException("memberEmail을 찾을 수 없습니다.")
+        val principalDetails = objectMapper.readValue(principalJsonData, PrincipalDetails::class.java)
+
+        //DB로 호출 함
+        //val member = memberRepository.findMemberByEmail(details.member.email)
+        //val principalDetails = PrincipalDetails(member) // 인증 객체
+        val authentication:Authentication = UsernamePasswordAuthenticationToken(
+                principalDetails,
+                principalDetails.password,
+                principalDetails.authorities)
 
         SecurityContextHolder.getContext().authentication = authentication // holder에 authentication이 넣어지면 인증이 완료되었다는 것
 
@@ -64,4 +76,17 @@ class CustomBasicAuthenticationFilter(
 
         chain.doFilter(request, response)
     }
+
+//    private fun reissueAccessToken(exception: JWTVerificationException, request: HttpServletRequest?) {
+//        if (exception is TokenExpiredException) {
+//            val refreshToken = CookieProvider.getCookie(request!!, "refreshCookie").orElseThrow()
+//            val validatedJwt = validatedJwt(refreshToken)
+//            val principalSpring = getPrincipalByAccessToken(refreshToken)
+//            val principalDetails = ObjectMapper().readValue(principalSpring, PrincipalDetails::class.java)
+//
+//            val authentication: Authentication = UsernamePasswordAuthenticationToken(principalDetails, principalDetails.password, principalDetails.authorities)
+//
+//            SecurityContextHolder.getContext().authentication = authentication
+//        }
+//    }
 }

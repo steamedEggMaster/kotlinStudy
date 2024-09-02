@@ -1,16 +1,21 @@
 package com.example.kotlinstudy.config.security
 
 import com.example.kotlinstudy.domain.member.MemberRepository
+import com.example.kotlinstudy.util.func.responseData
+import com.example.kotlinstudy.util.value.CmResDto
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -19,6 +24,7 @@ import org.springframework.security.config.annotation.web.configurers.*
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
@@ -26,6 +32,8 @@ import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.authentication.logout.LogoutFilter
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -41,6 +49,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity//(debug = true) // 거쳐간 필터들 알 수 있음
+@EnableMethodSecurity(securedEnabled = true) // EnableGlobalMethodSecurity가 deprecated 됨
 class SecurityConfig(
         private val authenticationConfiguration: AuthenticationConfiguration,
         private val objectMapper: ObjectMapper,
@@ -88,10 +97,34 @@ class SecurityConfig(
                 .authorizeHttpRequests(Customizer { auth ->
                     auth
                             //.requestMatchers("/**").hasRole("USER")
-                            .requestMatchers("/v1/posts").hasAnyRole("ADMIN")
+                            .requestMatchers("/v1/posts").hasAnyRole("USER", "ADMIN")
 
                 })
+        http
+                .logout { auth:LogoutConfigurer<HttpSecurity> -> // Customizer 을 붙이면 안됨
+                    auth
+                            .logoutUrl("/logout")
+                            .logoutSuccessHandler(CustomLogoutSuccessHandler(objectMapper))
+                }
+
         return http.build()
+    }
+
+    //로그아웃 성공 핸들러 커스텀
+    class CustomLogoutSuccessHandler(
+            private val objectMapper: ObjectMapper
+    ) : LogoutSuccessHandler {
+        private val log = KotlinLogging.logger {  }
+        override fun onLogoutSuccess(request: HttpServletRequest?, response: HttpServletResponse, authentication: Authentication?) {
+            log.info { "logout success" }
+            val context = SecurityContextHolder.getContext()
+            context.authentication = null
+            SecurityContextHolder.clearContext()
+
+            val cmResDto = CmResDto(HttpStatus.OK, "logout success", null)
+
+            responseData(response, objectMapper.writeValueAsString(cmResDto))
+        }
     }
 
     // 필터 통과 실패 시 핸들링 할 클래스
@@ -106,7 +139,7 @@ class SecurityConfig(
 
     @Bean
     fun authenticationFilter(): CustomBasicAuthenticationFilter {
-        return CustomBasicAuthenticationFilter(authenticationManager = authenticationManager(), memberRepository = memberRepository)
+        return CustomBasicAuthenticationFilter(authenticationManager = authenticationManager(), memberRepository = memberRepository, objectMapper = objectMapper)
     }
 
     @Bean
