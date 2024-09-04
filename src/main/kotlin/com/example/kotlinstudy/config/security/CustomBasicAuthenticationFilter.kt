@@ -26,7 +26,6 @@ import java.lang.RuntimeException
  */
 
 class CustomBasicAuthenticationFilter(
-        private val memberRepository: MemberRepository,
         private val objectMapper: ObjectMapper,
         authenticationManager: AuthenticationManager
 ) : BasicAuthenticationFilter(authenticationManager) {
@@ -40,7 +39,7 @@ class CustomBasicAuthenticationFilter(
         val path = request.servletPath
 
         // /login 경로는 필터를 적용하지 않음
-        if (path == "/login") {
+        if (path == "/login" || path == "/auth/member") {
             chain.doFilter(request, response)
             return
         }

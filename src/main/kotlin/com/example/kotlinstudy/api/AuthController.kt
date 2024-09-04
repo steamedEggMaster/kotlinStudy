@@ -34,7 +34,7 @@ class AuthController(
 
     @PostMapping("/member")
     fun joinApp(@Valid @RequestBody dto: LoginDto): CmResDto<*> {
-        return CmResDto(HttpStatus.OK, "회원가입r", authService.saveMember(dto))
+        return CmResDto(HttpStatus.OK, "회원가입", authService.saveMember(dto))
 
     }
 }

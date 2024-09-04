@@ -1,6 +1,5 @@
 package com.example.kotlinstudy.config
 
-import com.example.kotlinstudy.domain.member.*
 import com.example.kotlinstudy.domain.member.Member
 import com.example.kotlinstudy.domain.member.MemberRepository
 import com.example.kotlinstudy.domain.member.LoginDto
@@ -14,6 +13,7 @@ import mu.KotlinLogging
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.EventListener
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
 /**
  * @PackageName : com.example.kotlinstudy.config
@@ -68,7 +68,7 @@ class InitData(
 
     private fun generateMember(): Member = LoginDto(
             email = faker.internet.safeEmail(),
-            password = "1234",
+            rawPassword = "1234",
             role = Role.USER
     ).toEntity()
 

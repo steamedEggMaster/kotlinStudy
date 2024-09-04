@@ -65,7 +65,7 @@ class SecurityConfig(
     }
 
     @Bean
-    fun passwordEncoder():PasswordEncoder{
+    fun passwordEncoder():BCryptPasswordEncoder{
         return BCryptPasswordEncoder()
     }
 
@@ -98,6 +98,7 @@ class SecurityConfig(
                     auth
                             //.requestMatchers("/**").hasRole("USER")
                             .requestMatchers("/v1/posts").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers("/auth/member").permitAll()
 
                 })
         http
@@ -139,7 +140,7 @@ class SecurityConfig(
 
     @Bean
     fun authenticationFilter(): CustomBasicAuthenticationFilter {
-        return CustomBasicAuthenticationFilter(authenticationManager = authenticationManager(), memberRepository = memberRepository, objectMapper = objectMapper)
+        return CustomBasicAuthenticationFilter(authenticationManager = authenticationManager(), objectMapper = objectMapper)
     }
 
     @Bean
