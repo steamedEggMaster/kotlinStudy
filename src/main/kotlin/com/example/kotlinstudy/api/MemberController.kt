@@ -40,10 +40,4 @@ class MemberController(
     fun deleteById(@PathVariable id:Long): CmResDto<Any> {
         return CmResDto(HttpStatus.OK, "delete Member by id", memberService.deleteMember(id))
     }
-
-    @PostMapping("/member")
-    fun save(@Valid @RequestBody dto:LoginDto): CmResDto<*> {
-        return CmResDto(HttpStatus.OK, "save Member", memberService.saveMember(dto))
-
-    }
 }

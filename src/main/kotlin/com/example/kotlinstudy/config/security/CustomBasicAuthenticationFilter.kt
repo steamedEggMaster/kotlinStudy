@@ -26,12 +26,12 @@ import java.lang.RuntimeException
  */
 
 class CustomBasicAuthenticationFilter(
-        private val memberRepository : MemberRepository,
+        private val memberRepository: MemberRepository,
         private val objectMapper: ObjectMapper,
-    authenticationManager:AuthenticationManager
+        authenticationManager: AuthenticationManager
 ) : BasicAuthenticationFilter(authenticationManager) {
 
-    val log = KotlinLogging.logger {  }
+    val log = KotlinLogging.logger { }
 
     private val jwtManager = JwtManager()
 
@@ -48,40 +48,84 @@ class CustomBasicAuthenticationFilter(
 
         log.info { "권한이나 인증이 필요한 요청이 들어왔습니다." }
 
-        val token = request.getHeader(jwtManager.authorizationHeader).substring(7)
-
-        if (token == null) {
+        val accessToken = request.getHeader(jwtManager.authorizationHeader)?.substring(7)
+        if (accessToken == null) {
             log.info { "토큰이 없습니다." }
             chain.doFilter(request, response)
             return
         }
 
-        log.info { "token : $token" }
+        log.info { "accessToken : $accessToken" }
 
+        val accessTokenResult: TokenValidResult = jwtManager.validAccessToken(accessToken)
+        if (accessTokenResult is TokenValidResult.Failure) {
+            handleTokenException(accessTokenResult) {
+                if (accessTokenResult.exception is TokenExpiredException) {
+                    log.info { "getClass ==> ${accessTokenResult.exception.javaClass}" }
 
-        val principalJsonData = jwtManager.getPrincipalByAccessToken(token) ?: throw RuntimeException("memberEmail을 찾을 수 없습니다.")
+                    val refreshToken = CookieProvider.getCookie(request, CookieProvider.CookieName.REFRESH_COOKIE).orElseThrow()
+                    val refreshTokenResult = jwtManager.validRefreshToken(refreshToken)
+
+                    if (refreshTokenResult is TokenValidResult.Failure) {
+                        throw RuntimeException("invalid refreshToken")
+                    }
+
+                    log.info { "refreshToken을 사용하여 인증합시다" }
+
+                    val principalString = jwtManager.getPrincipalByRefreshToken(refreshToken)
+                    val details = objectMapper.readValue(principalString, PrincipalDetails::class.java)
+                    reissueAccessToken(details, response)
+                    setAuthentication(details, chain, request, response)
+                }
+            }
+            return
+        }
+
+        val principalJsonData = jwtManager.getPrincipalByAccessToken(accessToken)
         val principalDetails = objectMapper.readValue(principalJsonData, PrincipalDetails::class.java)
+        setAuthentication(principalDetails, chain, request, response)
 
         //DB로 호출 함
         //val member = memberRepository.findMemberByEmail(details.member.email)
         //val principalDetails = PrincipalDetails(member) // 인증 객체
-        val authentication:Authentication = UsernamePasswordAuthenticationToken(
-                principalDetails,
-                principalDetails.password,
-                principalDetails.authorities)
+//        val authentication: Authentication = UsernamePasswordAuthenticationToken(
+//                principalDetails,
+//                principalDetails.password,
+//                principalDetails.authorities)
+//        SecurityContextHolder.getContext().authentication = authentication // holder에 authentication이 넣어지면 인증이 완료되었다는 것
+//        chain.doFilter(request, response)
+    }
 
-        SecurityContextHolder.getContext().authentication = authentication // holder에 authentication이 넣어지면 인증이 완료되었다는 것
+    private fun setAuthentication(details: PrincipalDetails, chain: FilterChain, request: HttpServletRequest, response: HttpServletResponse) {
+        val authentication: Authentication = UsernamePasswordAuthenticationToken(
+                details,
+                details.password,
+                details.authorities)
 
-        log.info { "JWT 검증에 통과하였습니다." }
+        SecurityContextHolder.getContext().authentication = authentication
 
         chain.doFilter(request, response)
     }
 
+    private fun reissueAccessToken(details: PrincipalDetails?, response: HttpServletResponse) {
+        val recreatedAccessToken = jwtManager.generateAccessToken(objectMapper.writeValueAsString(details))
+        response.addHeader(jwtManager.authorizationHeader, jwtManager.jwtHeader + recreatedAccessToken)
+    }
+
+    private fun handleTokenException(tokenValidResult: TokenValidResult.Failure, func: () -> Unit) {
+        when (tokenValidResult.exception) {
+            is TokenExpiredException -> func()
+            else -> {
+                log.info { "여기 타는지 체크" }
+                log.error(tokenValidResult.exception.stackTraceToString())
+                throw tokenValidResult.exception
+            }
+        }
+    }
+
+
 //    private fun reissueAccessToken(exception: JWTVerificationException, request: HttpServletRequest?) {
 //        if (exception is TokenExpiredException) {
-//            val refreshToken = CookieProvider.getCookie(request!!, "refreshCookie").orElseThrow()
-//            val validatedJwt = validatedJwt(refreshToken)
-//            val principalSpring = getPrincipalByAccessToken(refreshToken)
 //            val principalDetails = ObjectMapper().readValue(principalSpring, PrincipalDetails::class.java)
 //
 //            val authentication: Authentication = UsernamePasswordAuthenticationToken(principalDetails, principalDetails.password, principalDetails.authorities)

@@ -22,7 +22,7 @@ class PostService(
         private val postRepository: PostRepository
 ) {
 
-    @PreAuthorize("hasAuthority('SUPER')") // SecurityCnfig의 @EnableMethodSecurity와 함께 사용되는 어노테이션
+    //@PreAuthorize("hasAuthority('SUPER')") // SecurityCnfig의 @EnableMethodSecurity와 함께 사용되는 어노테이션
     // 메서드를 제한함!
     @Transactional(readOnly = true)
     fun findPosts(pageable: Pageable): Page<PostRes> {

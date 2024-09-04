@@ -22,8 +22,8 @@ object CookieProvider { //object 파일은 싱글톤이면서 바로 static하�
         TODO()
     }
 
-    fun createCookie(cookieName: String, value:String, maxAge:Long): ResponseCookie { // Not Servlet Cookie!!
-        return ResponseCookie.from(cookieName, value)
+    fun createCookie(cookieName: CookieName, value:String, maxAge:Long): ResponseCookie { // Not Servlet Cookie!!
+        return ResponseCookie.from(cookieName.name, value)
                 .httpOnly(true) // cross-site script 공격 (클라이언트 단에서 Javascript를 변조하여 공격)을 방어 가능해짐
                 .secure(false) // http 허용 옵션
                 .path("/") // 모든 경로 허용
@@ -36,14 +36,19 @@ object CookieProvider { //object 파일은 싱글톤이면서 바로 static하�
         // 앞으론 이 방법을 사용하자!!
     }
 
-    fun getCookie(request: HttpServletRequest, cookieName: String): Optional<String> {
+    fun getCookie(request: HttpServletRequest, cookieName: CookieName): Optional<String> {
         val cookieValue = request.cookies.filter { cookie: Cookie ->
-            cookie.name == cookieName
+            cookie.name == cookieName.name
         }.map { cookie -> cookie.value }
                 .firstOrNull()
 
         log.info { "cookieValue==> $cookieValue" }
 
         return Optional.ofNullable(cookieValue)
+    }
+
+    enum class CookieName(
+    ){
+        REFRESH_COOKIE
     }
 }

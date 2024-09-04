@@ -7,7 +7,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
-import java.lang.RuntimeException
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
@@ -41,7 +40,7 @@ class JwtManager(
     private val jwtSubject = "my-token"
 
     fun generateRefreshToken(principal: String): String {
-        val expireDate = Date(System.nanoTime() + TimeUnit.DAYS.toMillis(refreshTokenExpireDay))
+        val expireDate = Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(refreshTokenExpireDay))
 
         log.info { "refreshToken ExpireDate => $expireDate" }
 
@@ -50,7 +49,7 @@ class JwtManager(
 
     fun generateAccessToken(principal:String): String {
 
-        val expireDate = Date(System.nanoTime() + TimeUnit.MINUTES.toMillis(accessTokenExpireSecond))
+        val expireDate = Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(accessTokenExpireSecond))
         log.info { "accessToken ExpireDate => $expireDate" }
 
         return doGenerateToken(expireDate, principal, accessSecretKey)
@@ -79,12 +78,20 @@ class JwtManager(
         return decodedJWT
     }
 
-    fun validatedJwt(token:String, secretKey: String): TokenValidResult { // return값이 true | JWTVerificationException
+    fun validAccessToken(token: String): TokenValidResult {
+        return validatedJwt(token, accessSecretKey)
+    }
+
+    fun validRefreshToken(token: String): TokenValidResult {
+        return validatedJwt(token, refreshSecretKey)
+    }
+
+    private fun validatedJwt(token:String, secretKey: String): TokenValidResult { // return값이 true | JWTVerificationException
         return try {
             getDecodeJwt(token, secretKey)
             TokenValidResult.Success()
         } catch (exception: JWTVerificationException) {
-            log.error { "error => ${exception.stackTraceToString()}" }
+            //log.error { "error => ${exception.stackTraceToString()}" }
             TokenValidResult.Failure(exception)
         }
     }
@@ -95,8 +102,8 @@ class JwtManager(
 //
 //
 sealed class TokenValidResult(){
-    class Success(val value:Boolean = true) : TokenValidResult()
-    class Failure(val value:JWTVerificationException) : TokenValidResult()
+    class Success(val successValue:Boolean = true) : TokenValidResult()
+    class Failure(val exception:JWTVerificationException) : TokenValidResult()
 }
 
 //class TokenValidResult(

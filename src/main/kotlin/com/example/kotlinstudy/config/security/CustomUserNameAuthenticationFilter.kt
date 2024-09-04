@@ -1,6 +1,7 @@
 package com.example.kotlinstudy.config.security
 
 import com.example.kotlinstudy.util.CookieProvider
+import com.example.kotlinstudy.util.CookieProvider.CookieName
 import com.example.kotlinstudy.util.func.responseData
 import com.example.kotlinstudy.util.value.CmResDto
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -48,12 +49,12 @@ class CustomUserNameAuthenticationFilter(
 
     override fun successfulAuthentication(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain, authResult: Authentication) {
         log.info { "로그인이 완료 되어 JWT 토큰이 발행되어 response 처리됩니다." }
-        val principalDetails = authResult?.principal as PrincipalDetails
+        val principalDetails = authResult.principal as PrincipalDetails
 
         val accessToken = jwtManager.generateAccessToken(objectMapper.writeValueAsString(principalDetails))
         val refreshToken = jwtManager.generateRefreshToken(objectMapper.writeValueAsString(principalDetails))
 
-        val refreshCookie = CookieProvider.createCookie("refreshCookie", refreshToken, TimeUnit.DAYS.toSeconds(jwtManager.refreshTokenExpireDay))
+        val refreshCookie = CookieProvider.createCookie(CookieName.REFRESH_COOKIE, refreshToken, TimeUnit.DAYS.toSeconds(jwtManager.refreshTokenExpireDay))
         response.addHeader(jwtManager.authorizationHeader, jwtManager.jwtHeader + accessToken)
         //response.addHeader(jwtManager.refreshTokenHeader, jwtManager.jwtHeader + refreshToken)
         // 영상제작자는 accessToken은 Header에 커스텀 헤더로, refreshToken은 쿠키에 감싸서 보냄

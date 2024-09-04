@@ -24,4 +24,8 @@ class TestController(
 //    @GetMapping("/health")
 //    fun healthTest():String = "hello kotlin-blog"
 
+    @GetMapping("/error") // security Default redirect URL
+    fun errorTest():String{
+        return "error"
+    }
 }

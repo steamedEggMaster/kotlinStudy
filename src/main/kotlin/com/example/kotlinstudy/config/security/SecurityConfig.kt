@@ -49,7 +49,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity//(debug = true) // 거쳐간 필터들 알 수 있음
-@EnableMethodSecurity(securedEnabled = true) // EnableGlobalMethodSecurity가 deprecated 됨
+//@EnableMethodSecurity(securedEnabled = true) // EnableGlobalMethodSecurity가 deprecated 됨
 class SecurityConfig(
         private val authenticationConfiguration: AuthenticationConfiguration,
         private val objectMapper: ObjectMapper,
