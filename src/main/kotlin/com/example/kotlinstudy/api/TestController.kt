@@ -1,6 +1,10 @@
 package com.example.kotlinstudy.api
 
+import com.example.kotlinstudy.util.dto.SearchCondition
+import com.example.kotlinstudy.util.dto.SearchType
+import mu.KotlinLogging
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 /**
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 class TestController(
 
 ) {
+    private val log = KotlinLogging.logger {  }
 
     @GetMapping("/health")
     fun healthTest():String {
@@ -27,5 +32,22 @@ class TestController(
     @GetMapping("/error") // security Default redirect URL
     fun errorTest():String{
         return "error"
+    }
+
+    @GetMapping("/enum")
+    fun enumTest(searchCondition: SearchCondition): String {
+        log.info { """
+            $searchCondition
+            
+            ${searchCondition.searchType}
+            ${searchCondition.keyword}
+        """.trimIndent() }
+        return "test"
+    }
+
+    @GetMapping("/enum2")
+    fun enumTest2(searchType: SearchType): String {
+
+        return searchType.name
     }
 }

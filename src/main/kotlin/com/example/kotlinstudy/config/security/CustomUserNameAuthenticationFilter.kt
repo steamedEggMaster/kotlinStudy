@@ -1,5 +1,7 @@
 package com.example.kotlinstudy.config.security
 
+import com.example.kotlinstudy.domain.HashMapRepositoryImpl
+import com.example.kotlinstudy.domain.InMemoryRepository
 import com.example.kotlinstudy.util.CookieProvider
 import com.example.kotlinstudy.util.CookieProvider.CookieName
 import com.example.kotlinstudy.util.func.responseData
@@ -27,7 +29,8 @@ import java.util.concurrent.TimeUnit
  */
 class CustomUserNameAuthenticationFilter(
     //private val authenticationManager: AuthenticationManager
-        private val objectMapper: ObjectMapper
+        private val objectMapper: ObjectMapper,
+        private val memoryRepository: InMemoryRepository
 ) : UsernamePasswordAuthenticationFilter() {
 
     private val log = KotlinLogging.logger {  }
@@ -55,6 +58,9 @@ class CustomUserNameAuthenticationFilter(
         val refreshToken = jwtManager.generateRefreshToken(objectMapper.writeValueAsString(principalDetails))
 
         val refreshCookie = CookieProvider.createCookie(CookieName.REFRESH_COOKIE, refreshToken, TimeUnit.DAYS.toSeconds(jwtManager.refreshTokenExpireDay))
+
+        memoryRepository.save(refreshToken, objectMapper.writeValueAsString(principalDetails))
+
         response.addHeader(jwtManager.authorizationHeader, jwtManager.jwtHeader + accessToken)
         //response.addHeader(jwtManager.refreshTokenHeader, jwtManager.jwtHeader + refreshToken)
         // 영상제작자는 accessToken은 Header에 커스텀 헤더로, refreshToken은 쿠키에 감싸서 보냄

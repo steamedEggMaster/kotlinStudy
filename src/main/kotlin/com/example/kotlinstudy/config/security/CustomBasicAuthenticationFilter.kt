@@ -1,8 +1,7 @@
 package com.example.kotlinstudy.config.security
 
-import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.exceptions.TokenExpiredException
-import com.example.kotlinstudy.domain.member.MemberRepository
+import com.example.kotlinstudy.domain.InMemoryRepository
 import com.example.kotlinstudy.util.CookieProvider
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
@@ -26,6 +25,7 @@ import java.lang.RuntimeException
  */
 
 class CustomBasicAuthenticationFilter(
+        private val memoryRepository: InMemoryRepository,
         private val objectMapper: ObjectMapper,
         authenticationManager: AuthenticationManager
 ) : BasicAuthenticationFilter(authenticationManager) {
@@ -71,10 +71,14 @@ class CustomBasicAuthenticationFilter(
 
                     log.info { "refreshToken을 사용하여 인증합시다" }
 
-                    val principalString = jwtManager.getPrincipalByRefreshToken(refreshToken)
-                    val details = objectMapper.readValue(principalString, PrincipalDetails::class.java)
-                    reissueAccessToken(details, response)
-                    setAuthentication(details, chain, request, response)
+                    //val principalString = jwtManager.getPrincipalByRefreshToken(refreshToken)
+                    //val details = objectMapper.readValue(principalString, PrincipalDetails::class.java)
+                    // 두 과정 대신 인메모리에서 가져옴 -> 서버 재시작 시 사라짐
+                    val jsonDetail = memoryRepository.findByKey(refreshToken) as String
+                    val principalDetails = objectMapper.readValue(jsonDetail, PrincipalDetails::class.java)
+
+                    reissueAccessToken(principalDetails, response)
+                    setAuthentication(principalDetails, chain, request, response)
                 }
             }
             return

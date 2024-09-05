@@ -95,6 +95,13 @@ class JwtManager(
             TokenValidResult.Failure(exception)
         }
     }
+
+    companion object {
+        fun getRefreshTokenDay(): Long {
+            val jwtManager = JwtManager()
+            return jwtManager.refreshTokenExpireDay
+        }
+    }
 }
 
 /*

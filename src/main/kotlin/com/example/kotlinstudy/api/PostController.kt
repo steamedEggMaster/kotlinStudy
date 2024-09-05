@@ -2,6 +2,7 @@ package com.example.kotlinstudy.api
 
 import com.example.kotlinstudy.domain.post.PostSaveReq
 import com.example.kotlinstudy.service.PostService
+import com.example.kotlinstudy.util.dto.SearchCondition
 import com.example.kotlinstudy.util.value.CmResDto
 import jakarta.validation.Valid
 import org.springframework.data.domain.Pageable
@@ -25,8 +26,9 @@ class PostController(
 ) {
 
     @GetMapping("/posts")
-    fun findPosts(@PageableDefault(size = 10) pageable: Pageable) : CmResDto<*> {
-        return CmResDto(HttpStatus.OK, "find posts", postService.findPosts(pageable));
+    fun findPosts(@PageableDefault(size = 10) pageable: Pageable,
+                  searchCondition: SearchCondition) : CmResDto<*> {
+        return CmResDto(HttpStatus.OK, "find posts", postService.findPosts(pageable, searchCondition))
     }
 
     @GetMapping("/post/{id}")

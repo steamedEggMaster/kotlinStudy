@@ -1,5 +1,8 @@
 package com.example.kotlinstudy.config.security
 
+import com.example.kotlinstudy.domain.HashMapRepositoryImpl
+import com.example.kotlinstudy.domain.InMemoryRepository
+import com.example.kotlinstudy.domain.RedisRepositoryImpl
 import com.example.kotlinstudy.domain.member.MemberRepository
 import com.example.kotlinstudy.util.func.responseData
 import com.example.kotlinstudy.util.value.CmResDto
@@ -9,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.AuthenticationManager
@@ -53,14 +57,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 class SecurityConfig(
         private val authenticationConfiguration: AuthenticationConfiguration,
         private val objectMapper: ObjectMapper,
-        private val memberRepository: MemberRepository
+        private val memberRepository: MemberRepository,
+        private val redisTemplate: RedisTemplate<String, Any>
 ) {
     private val log = KotlinLogging.logger { }
 
-    //@Bean
+    @Bean
     fun webSecurityCustomizer(): WebSecurityCustomizer? {
         return WebSecurityCustomizer { web: WebSecurity ->
-            web.ignoring().requestMatchers("/ignore1", "/ignore2") // 모든것을 허용할 시 "/**" *두개
+            web.ignoring().requestMatchers("/**") // 모든것을 허용할 시 "/**" *두개
         }
     }
 
@@ -77,7 +82,7 @@ class SecurityConfig(
         http
                 .formLogin { auth -> auth.disable() }
         http
-                .headers { headers -> headers.frameOptions(Customizer { frameOptionsConfig -> frameOptionsConfig.disable() }) }
+                .headers { headers -> headers.frameOptions { frameOptionsConfig -> frameOptionsConfig.disable() } }
         http
                 .httpBasic { auth -> auth.disable() }
         http
@@ -94,13 +99,14 @@ class SecurityConfig(
         http
                 .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter::class.java).exceptionHandling(Customizer { auth -> auth.accessDeniedHandler(CustomAccessDeniedHandler()) })
         http
-                .authorizeHttpRequests(Customizer { auth ->
+                .authorizeHttpRequests { auth ->
                     auth
                             //.requestMatchers("/**").hasRole("USER")
                             .requestMatchers("/v1/posts").hasAnyRole("USER", "ADMIN")
                             .requestMatchers("/auth/member").permitAll()
 
-                })
+                }
+
         http
                 .logout { auth:LogoutConfigurer<HttpSecurity> -> // Customizer 을 붙이면 안됨
                     auth
@@ -140,7 +146,7 @@ class SecurityConfig(
 
     @Bean
     fun authenticationFilter(): CustomBasicAuthenticationFilter {
-        return CustomBasicAuthenticationFilter(authenticationManager = authenticationManager(), objectMapper = objectMapper)
+        return CustomBasicAuthenticationFilter(memoryRepository = inMemoryRepository(), authenticationManager = authenticationManager(), objectMapper = objectMapper)
     }
 
     @Bean
@@ -151,7 +157,7 @@ class SecurityConfig(
     @Bean
     fun loginFilter(): UsernamePasswordAuthenticationFilter {
 
-        val authenticationFilter = CustomUserNameAuthenticationFilter(objectMapper)
+        val authenticationFilter = CustomUserNameAuthenticationFilter(objectMapper, inMemoryRepository())
         authenticationFilter.setAuthenticationManager(authenticationManager())
         authenticationFilter.setFilterProcessesUrl("/login")
 //        authenticationFilter.setAuthenticationFailureHandler(CustomAuthenticationFailureHandler())
@@ -189,6 +195,11 @@ class SecurityConfig(
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", config)
         return source
+    }
+
+    @Bean
+    fun inMemoryRepository(): RedisRepositoryImpl {
+        return RedisRepositoryImpl(redisTemplate)
     }
 
 }
