@@ -13,6 +13,10 @@ import java.util.TreeMap
 
 data class CmResDto<T>(
         val resultCode: T,
-        val resultType:String,
+        var resultMsg:String,
         val data:T
-)
+) {
+    fun reflectVersion(apiVersion: String){
+        this.resultMsg = "version: $apiVersion / ${this.resultMsg}"
+    }
+}

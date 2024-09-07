@@ -1,9 +1,9 @@
 package com.example.kotlinstudy.config.filter
 
-import jakarta.servlet.FilterRegistration
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
 
 /**
  * @PackageName : com.example.kotlinstudy.config.filter
@@ -49,11 +49,11 @@ class FilterConfig {
 
 
     @Bean
-    fun registMyAuthenticationFilter(): FilterRegistrationBean<MyAuthenticationFilter> {
-        val bean = FilterRegistrationBean(MyAuthenticationFilter())
+    fun mdcLoggingFilter(): FilterRegistrationBean<MDCLoggingFilter> {
+        val bean = FilterRegistrationBean(MDCLoggingFilter())
 
-        bean.addUrlPatterns("/api/*") // * 하나임!
-        bean.order = 0
+        bean.addUrlPatterns("/*") // * 하나임!
+        bean.order = Ordered.HIGHEST_PRECEDENCE
 
         return bean
     }

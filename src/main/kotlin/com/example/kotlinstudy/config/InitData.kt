@@ -7,7 +7,6 @@ import com.example.kotlinstudy.domain.member.Role
 import com.example.kotlinstudy.domain.post.Post
 import com.example.kotlinstudy.domain.post.PostRepository
 import com.example.kotlinstudy.domain.post.PostSaveReq
-import com.example.kotlinstudy.domain.post.toEntity
 import io.github.serpro69.kfaker.faker
 import mu.KotlinLogging
 import org.springframework.boot.context.event.ApplicationReadyEvent

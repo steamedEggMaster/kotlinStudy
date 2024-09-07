@@ -1,8 +1,7 @@
-package com.example.kotlinstudy.api
+package com.example.kotlinstudy.web
 
 import com.example.kotlinstudy.domain.member.LoginDto
 import com.example.kotlinstudy.service.AuthService
-import com.example.kotlinstudy.service.MemberService
 import com.example.kotlinstudy.util.value.CmResDto
 import jakarta.servlet.http.HttpSession
 import jakarta.validation.Valid

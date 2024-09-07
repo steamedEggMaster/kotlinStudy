@@ -17,7 +17,7 @@
       <level>DEBUG</level> <!--DEBUG레벨 이상의 로그만 보겠다-->
     </filter>
     <encoder> <!-- Appender 내에 포함되는 항목, <pattern>을 사용하여 원하는 형식으로 로그를 표현할 수 있음. -->
-      <pattern>%green([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %magenta([%-5level]) %highlight([%thread]) %cyan(%logger{30}) %yellow(%msg%n) </pattern>
+      <pattern>[%X{request_id:-startup}] %green([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %magenta([%-5level]) %highlight([%thread]) %cyan(%logger{30}) %yellow(%msg%n) </pattern>
     </encoder>
   </appender>
 

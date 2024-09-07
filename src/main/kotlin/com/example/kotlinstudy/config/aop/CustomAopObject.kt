@@ -24,18 +24,24 @@ object CustomAopObject {
     *
     * */
 
-    fun highOrderFunc(func:()->Unit){
-        log.info { "before" }
-        func()
-        log.info { "after" }
+//    fun highOrderFunc(func:()->Unit){
+//        log.info { "before" }
+//        func()
+//        log.info { "after" }
+//    }
+
+    fun wrapTryCatchVoidFunc(func: ()->Unit){
+        try {
+            func()
+        }catch (e: Exception){
+            log.error { e.stackTraceToString() }
+            //throw e
+        }
     }
-
-
-
 }
-fun main(){
-    doSomething()
-}
-            // 3번 조건
-fun doSomething() = CustomAopObject.highOrderFunc { (println("do something")) }
-                                                     // 1번 조건 + 마지막 인자 -> { } 로 빼서 넘기기 가능
+//fun main(){
+//    doSomething()
+//}
+//            // 3번 조건
+//fun doSomething() = CustomAopObject.highOrderFunc { (println("do something")) }
+//                                                     // 1번 조건 + 마지막 인자 -> { } 로 빼서 넘기기 가능

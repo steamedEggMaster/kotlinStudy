@@ -28,9 +28,16 @@ import org.springframework.web.context.request.ServletRequestAttributes
 @Aspect
 class LoggerAspect {
 
+    /*
+    * interceptor vs filter vs aspect aop
+    * - aspect aop : 로직의 시간 측정, 트랜잭션 관리 등
+    * - filter : 공통된 보안 및 인증 및 인가 처리 등, 이미지 데이터 압축 및 문자열 인코딩, 모든 요청 logging
+    * - interceptor : Spring으로 부터 분리되어야 하는, 세부적인 보안 설정
+    * */
+
     val log = KotlinLogging.logger { }
 
-    @Pointcut("execution(* com.example.kotlinstudy.api.*Controller.*(..))")
+    @Pointcut("execution(* com.example.kotlinstudy.web.*Controller.*(..))")
     // api 패키지 밑의 Controller 이름을 붙힌 모든 클래스의 인자가 0개 이상(..)인 메서드에 적용
     private fun controllerCut() = Unit
 

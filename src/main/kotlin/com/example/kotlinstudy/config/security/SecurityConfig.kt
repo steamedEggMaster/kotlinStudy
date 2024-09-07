@@ -4,7 +4,7 @@ import com.example.kotlinstudy.domain.HashMapRepositoryImpl
 import com.example.kotlinstudy.domain.InMemoryRepository
 import com.example.kotlinstudy.domain.RedisRepositoryImpl
 import com.example.kotlinstudy.domain.member.MemberRepository
-import com.example.kotlinstudy.util.func.responseData
+import com.example.kotlinstudy.util.Script.responseData
 import com.example.kotlinstudy.util.value.CmResDto
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletRequest
