@@ -1,6 +1,5 @@
 package com.example.kotlinstudy.config.security
 
-import com.example.kotlinstudy.domain.HashMapRepositoryImpl
 import com.example.kotlinstudy.domain.InMemoryRepository
 import com.example.kotlinstudy.util.CookieProvider
 import com.example.kotlinstudy.util.CookieProvider.CookieName

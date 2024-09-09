@@ -39,5 +39,12 @@ class Comment(
         return "Comment(content='$content', post=$post, member=$member)"
     }
 
-
+    fun toDto(): CommentRes {
+        val dto = CommentRes(
+                member = this.member.toDto(),
+                content = content
+        )
+        setBaseDtoProperty(dto)
+        return dto
+    }
 }

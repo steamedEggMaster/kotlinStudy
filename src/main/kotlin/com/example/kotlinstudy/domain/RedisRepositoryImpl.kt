@@ -3,11 +3,8 @@ package com.example.kotlinstudy.domain
 import com.example.kotlinstudy.config.security.JwtManager
 import mu.KotlinLogging
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.stereotype.Repository
 import java.time.Duration
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 /**
  * @PackageName : com.example.kotlinstudy.domain

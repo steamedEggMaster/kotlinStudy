@@ -1,6 +1,8 @@
 package com.example.kotlinstudy.repo
 
 import com.example.kotlinstudy.config.P6spyPrettySqlFormatter
+import com.example.kotlinstudy.domain.comment.CommentRepository
+import com.example.kotlinstudy.domain.comment.CommentRepositoryImpl
 import com.example.kotlinstudy.domain.post.PostRepository
 import com.example.kotlinstudy.util.dto.SearchCondition
 import com.example.kotlinstudy.util.dto.SearchType
@@ -41,9 +43,20 @@ class RepositoriesTest {
     @Autowired
     private lateinit var postRepository: PostRepository
 
+    @Autowired
+    private lateinit var commentRepository: CommentRepository
+
     @Test
     fun setupTest(){
         log.info { "setUp!!!!" }
+    }
+
+    @Test
+    fun findCommentByAncestorCommentTest(){
+        val byAncestorComment = commentRepository.findCommentByAncestorComment(3)
+        for(comment in byAncestorComment){
+            log.info { comment }
+        }
     }
 
     @Test
@@ -71,6 +84,11 @@ class RepositoriesTest {
             @Autowired
             private val entityManager: EntityManager
     ){
+
+        @Bean
+        fun commentRepository() : CommentRepository {
+            return CommentRepositoryImpl(springDataQueryFactory(), entityManager)
+        }
 
         @Bean
         fun springDataQueryFactory(): SpringDataQueryFactoryImpl {

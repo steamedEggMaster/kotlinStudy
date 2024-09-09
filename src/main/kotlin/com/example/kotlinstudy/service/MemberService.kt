@@ -4,7 +4,6 @@ import com.example.kotlinstudy.domain.member.*
 import com.example.kotlinstudy.exception.MemberNotFoundException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -44,7 +43,7 @@ class MemberService(
     fun findMemberById(id:Long): MemberRes {
         return memberRepository.findById(id)
                 .orElseThrow {
-                    throw MemberNotFoundException(id)
+                    throw MemberNotFoundException(id.toString())
                 }.toDto()
     }
 }

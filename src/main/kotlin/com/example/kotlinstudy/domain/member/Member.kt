@@ -34,8 +34,7 @@ class Member(
         private set
 
     fun toDto(): MemberRes {
-        return MemberRes(
-                id = this.id!!,
+        val dto = MemberRes(
                 // !!(Not-null assertion)
                 // : kotlin의 null 안정성 기능 중 하나
                 // nullable 타입의 변수를 강제로 non-null로 변환
@@ -44,13 +43,17 @@ class Member(
                 email = this.email,
                 password = this.password,
                 role = this.role,
-                createdAt = this.createdAt,
-                updatedAt = this.updatedAt
         )
+
+        dto.id = this.id!!
+        dto.createdAt = this.createdAt
+        dto.updatedAt = this.updatedAt
+
+        return dto
     }
 
     override fun toString(): String {
-        return "Member(email='$email', password='$password', role=$role, createAt=$createdAt)"
+        return "Member(email='$email', password='$password', role=$role)"
     }
 
 

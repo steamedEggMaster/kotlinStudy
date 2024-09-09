@@ -1,13 +1,17 @@
 package com.example.kotlinstudy.config
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import io.github.serpro69.kfaker.ConfigBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 /**
  * @PackageName : com.example.kotlinstudy.config
@@ -23,9 +27,15 @@ class ObjectMapperConfig {
 
     @Bean
     fun objectMapper(): ObjectMapper {
-        val mapper = ObjectMapper()
-        mapper.registerModule(JavaTimeModule())
-        //mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        val mapper = JsonMapper.builder()
+                .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)  // 알파벳 순서로 정렬
+                .build()
+        val javaTimeModule = JavaTimeModule()
+
+        // 해당 모듈에 Serializer 등록해주기
+        javaTimeModule.addSerializer(LocalDateTime::class.java, CustomLocalDateTimeSerializer())
+        javaTimeModule.addDeserializer(LocalDateTime::class.java, CustomLocalDateTimeDeserializer())
+        mapper.registerModule(javaTimeModule)
 
         mapper.registerModule(
                 KotlinModule.Builder()
@@ -39,4 +49,25 @@ class ObjectMapperConfig {
         return mapper
     }
 
+
+    // LocalDateTime Formatting
+    class CustomLocalDateTimeSerializer : JsonSerializer<LocalDateTime>() {
+        private val dateTimeFormat = "yyyy-MM-dd HH:mm:ss"
+        private val formatter = DateTimeFormatter.ofPattern(dateTimeFormat, Locale.KOREA)
+
+        override fun serialize(value: LocalDateTime, gen: JsonGenerator, serializers: SerializerProvider) {
+            gen.writeString(formatter.format(value))
+        }
+    }
+
+    // LocalDateTime Formatting Deserializer
+    class CustomLocalDateTimeDeserializer : JsonDeserializer<LocalDateTime>() {
+        private val dateTimeFormat = "yyyy-MM-dd HH:mm:ss"
+        private val formatter = DateTimeFormatter.ofPattern(dateTimeFormat, Locale.KOREA)
+
+        override fun deserialize(p: JsonParser, ctxt: DeserializationContext): LocalDateTime {
+            val text = p.text
+            return LocalDateTime.parse(text, formatter)
+        }
+    }
 }

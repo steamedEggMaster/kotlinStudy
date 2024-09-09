@@ -10,10 +10,7 @@ package com.example.kotlinstudy.exception
  */
 sealed class BusinessException : RuntimeException {
 
-    private var errorCode:ErrorCode
-        get() {
-            return this.errorCode
-        }
+    val errorCode:ErrorCode
 
     constructor(errorCode: ErrorCode):super(errorCode.message){
         this.errorCode = errorCode
@@ -22,4 +19,6 @@ sealed class BusinessException : RuntimeException {
     constructor(message: String?, errorCode: ErrorCode):super(message){
         this.errorCode = errorCode
     }
+
+
 }

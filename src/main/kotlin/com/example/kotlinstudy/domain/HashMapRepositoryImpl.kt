@@ -4,10 +4,8 @@ import com.example.kotlinstudy.config.security.JwtManager
 import mu.KotlinLogging
 import net.jodah.expiringmap.ExpirationPolicy
 import net.jodah.expiringmap.ExpiringMap
-import org.springframework.stereotype.Repository
 import java.lang.RuntimeException
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 

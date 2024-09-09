@@ -1,7 +1,8 @@
 package com.example.kotlinstudy.domain
 
-import com.fasterxml.jackson.annotation.JsonFormat
+import com.example.kotlinstudy.util.dto.BaseDto
 import jakarta.persistence.*
+import mu.KotlinLogging
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -23,18 +24,35 @@ abstract class AuditingEntity(
     id:Long
 ) : AuditingEntityId(id) {
 
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     @CreatedDate
-    @Column(name = "create_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     var createdAt:LocalDateTime = LocalDateTime.now()
         protected set
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     @LastModifiedDate
     @Column(name = "updated_at")
     var updatedAt:LocalDateTime = LocalDateTime.now()
         protected set
+
+    @Column(name = "deleted_at")
+    var deletedAt:LocalDateTime? = null
+        protected set
+
+     fun closedEntity(){
+        this.deletedAt = LocalDateTime.now()
+
+        log.info { "${this::class.java.name} : 비공개 처리 : ${this.deletedAt}" }
+    }
+
+    protected fun setBaseDtoProperty(dto: BaseDto) {
+        dto.id = this.id
+        dto.createdAt = this.createdAt
+        dto.updatedAt = this.updatedAt
+    }
+
+    companion object {
+        private val log = KotlinLogging.logger {  }
+    }
 
 }
 
@@ -46,6 +64,6 @@ abstract class AuditingEntityId(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id:Long? = null
+    var id:Long = id
         protected set
 }

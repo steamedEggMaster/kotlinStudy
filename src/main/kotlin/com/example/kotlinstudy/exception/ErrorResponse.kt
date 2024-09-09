@@ -1,6 +1,5 @@
 package com.example.kotlinstudy.exception
 
-import org.springframework.validation.AbstractBindingResult
 import org.springframework.validation.BindingResult
 
 /**

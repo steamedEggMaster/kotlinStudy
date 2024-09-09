@@ -1,7 +1,5 @@
 package com.example.kotlinstudy.repo
 
-import com.example.kotlinstudy.domain.HashMapRepositoryImpl
-import com.example.kotlinstudy.domain.InMemoryRepository
 import com.example.kotlinstudy.domain.RedisRepositoryImpl
 import com.example.kotlinstudy.setup.SecurityConfig
 import com.example.kotlinstudy.setup.TestRedisConfiguration
@@ -10,16 +8,8 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.data.redis.connection.RedisConnectionFactory
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
-import org.springframework.data.redis.core.RedisTemplate
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 /**

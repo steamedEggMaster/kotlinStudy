@@ -7,7 +7,6 @@ import com.example.kotlinstudy.domain.member.MemberRes
 import mu.KotlinLogging
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
