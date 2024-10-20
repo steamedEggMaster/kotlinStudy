@@ -16,8 +16,7 @@
 9. Annotation을 활용한 Enum Class ↔ DB 데이터 간의 변환
 10. @Scheduled + @EnableScheduling 을 이용하여 메서드 스케줄링
 
-참고 유튜브
-```
-https://www.youtube.com/watch?v=VU75rD0q7Us&list=PLiLLi47PCMPjdezfGUnayz5PwEfwAQCBi&index=12
-```
+
+### [참고 유튜브]
+(https://www.youtube.com/watch?v=VU75rD0q7Us&list=PLiLLi47PCMPjdezfGUnayz5PwEfwAQCBi&index=12)
 
